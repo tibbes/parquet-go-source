@@ -8,6 +8,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/blob"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/blockblob"
 	"github.com/xitongsys/parquet-go/source"
 )
 
@@ -15,7 +17,7 @@ import (
 type AzBlockBlob struct {
 	ctx             context.Context
 	URL             *url.URL
-	blockBlobClient *azblob.BlockBlobClient
+	blockBlobClient *blockblob.Client
 
 	// write-related fields
 	writeDone  chan error
@@ -35,13 +37,13 @@ var (
 )
 
 // NewAzBlobFileWriter creates an Azure Blob FileWriter, to be used with NewParquetWriter
-func NewAzBlobFileWriter(ctx context.Context, URL string, credential azcore.TokenCredential, clientOptions azblob.ClientOptions) (source.ParquetFile, error) {
+func NewAzBlobFileWriter(ctx context.Context, URL string, credential azcore.TokenCredential, clientOptions blockblob.ClientOptions) (source.ParquetFile, error) {
 	var err error
-	var client *azblob.BlockBlobClient
+	var client *blockblob.Client
 	if credential == nil {
-		client, err = azblob.NewBlockBlobClientWithNoCredential(URL, &clientOptions)
+		client, err = blockblob.NewClientWithNoCredential(URL, &clientOptions)
 	} else {
-		client, err = azblob.NewBlockBlobClient(URL, credential, &clientOptions)
+		client, err = blockblob.NewClient(URL, credential, &clientOptions)
 	}
 	if err != nil {
 		return nil, err
@@ -50,14 +52,14 @@ func NewAzBlobFileWriter(ctx context.Context, URL string, credential azcore.Toke
 	return NewAzBlobFileWriterWithClient(ctx, URL, client)
 }
 
-// NewAzBlobFileWriterWithSharedKey creates an Azure Blob FileWriter, to be used with NewParquetWriter
-func NewAzBlobFileWriterWithSharedKey(ctx context.Context, URL string, credential *azblob.SharedKeyCredential, clientOptions azblob.ClientOptions) (source.ParquetFile, error) {
+// NewAzBlobFileWriterWithSharedKeyCredential creates an Azure Blob FileWriter, to be used with NewParquetWriter
+func NewAzBlobFileWriterWithSharedKeyCredential(ctx context.Context, URL string, credential *azblob.SharedKeyCredential, clientOptions *blockblob.ClientOptions) (source.ParquetFile, error) {
 	var err error
-	var client *azblob.BlockBlobClient
+	var client *blockblob.Client
 	if credential == nil {
-		client, err = azblob.NewBlockBlobClientWithNoCredential(URL, &clientOptions)
+		client, err = blockblob.NewClientWithNoCredential(URL, clientOptions)
 	} else {
-		client, err = azblob.NewBlockBlobClientWithSharedKey(URL, credential, &clientOptions)
+		client, err = blockblob.NewClientWithSharedKeyCredential(URL, credential, clientOptions)
 	}
 	if err != nil {
 		return nil, err
@@ -67,7 +69,7 @@ func NewAzBlobFileWriterWithSharedKey(ctx context.Context, URL string, credentia
 }
 
 // NewAzBlobFileWriterWithClient creates an Azure Blob FileWriter, to be used with NewParquetWriter
-func NewAzBlobFileWriterWithClient(ctx context.Context, URL string, client *azblob.BlockBlobClient) (source.ParquetFile, error) {
+func NewAzBlobFileWriterWithClient(ctx context.Context, URL string, client *blockblob.Client) (source.ParquetFile, error) {
 	if client == nil {
 		return nil, errors.New("client cannot be nil")
 	}
@@ -80,13 +82,13 @@ func NewAzBlobFileWriterWithClient(ctx context.Context, URL string, client *azbl
 }
 
 // NewAzBlobFileReader creates an Azure Blob FileReader, to be used with NewParquetReader
-func NewAzBlobFileReader(ctx context.Context, URL string, credential azcore.TokenCredential, clientOptions azblob.ClientOptions) (source.ParquetFile, error) {
+func NewAzBlobFileReader(ctx context.Context, URL string, credential azcore.TokenCredential, clientOptions blockblob.ClientOptions) (source.ParquetFile, error) {
 	var err error
-	var client *azblob.BlockBlobClient
+	var client *blockblob.Client
 	if credential == nil {
-		client, err = azblob.NewBlockBlobClientWithNoCredential(URL, &clientOptions)
+		client, err = blockblob.NewClientWithNoCredential(URL, &clientOptions)
 	} else {
-		client, err = azblob.NewBlockBlobClient(URL, credential, &clientOptions)
+		client, err = blockblob.NewClient(URL, credential, &clientOptions)
 	}
 	if err != nil {
 		return nil, err
@@ -95,14 +97,14 @@ func NewAzBlobFileReader(ctx context.Context, URL string, credential azcore.Toke
 	return NewAzBlobFileReaderWithClient(ctx, URL, client)
 }
 
-// NewAzBlobFileReaderWithSharedKey creates an Azure Blob FileReader, to be used with NewParquetReader
-func NewAzBlobFileReaderWithSharedKey(ctx context.Context, URL string, credential *azblob.SharedKeyCredential, clientOptions azblob.ClientOptions) (source.ParquetFile, error) {
+// NewAzBlobFileReaderWithSharedKeyCredential creates an Azure Blob FileReader, to be used with NewParquetReader
+func NewAzBlobFileReaderWithSharedKeyCredential(ctx context.Context, URL string, credential *azblob.SharedKeyCredential, clientOptions blockblob.ClientOptions) (source.ParquetFile, error) {
 	var err error
-	var client *azblob.BlockBlobClient
+	var client *blockblob.Client
 	if credential == nil {
-		client, err = azblob.NewBlockBlobClientWithNoCredential(URL, &clientOptions)
+		client, err = blockblob.NewClientWithNoCredential(URL, &clientOptions)
 	} else {
-		client, err = azblob.NewBlockBlobClientWithSharedKey(URL, credential, &clientOptions)
+		client, err = blockblob.NewClientWithSharedKeyCredential(URL, credential, &clientOptions)
 	}
 	if err != nil {
 		return nil, err
@@ -112,7 +114,7 @@ func NewAzBlobFileReaderWithSharedKey(ctx context.Context, URL string, credentia
 }
 
 // NewAzBlobFileReaderWithClient creates an Azure Blob FileReader, to be used with NewParquetReader
-func NewAzBlobFileReaderWithClient(ctx context.Context, URL string, client *azblob.BlockBlobClient) (source.ParquetFile, error) {
+func NewAzBlobFileReaderWithClient(ctx context.Context, URL string, client *blockblob.Client) (source.ParquetFile, error) {
 	if client == nil {
 		return nil, errors.New("client cannot be nil")
 	}
@@ -159,9 +161,11 @@ func (s *AzBlockBlob) Read(p []byte) (n int, err error) {
 	}
 
 	count := int64(len(p))
-	resp, err := s.blockBlobClient.Download(s.ctx, &azblob.BlobDownloadOptions{
-		Offset: &s.offset,
-		Count:  &count,
+	resp, err := s.blockBlobClient.DownloadStream(s.ctx, &blob.DownloadStreamOptions{
+		Range: blob.HTTPRange{
+			Offset: s.offset,
+			Count:  count,
+		},
 	})
 	if err != nil {
 		return 0, err
@@ -175,8 +179,7 @@ func (s *AzBlockBlob) Read(p []byte) (n int, err error) {
 		toRead = count
 	}
 
-	body := resp.Body(nil)
-	bytesRead, err := io.ReadFull(body, p[:toRead])
+	bytesRead, err := io.ReadFull(resp.Body, p[:toRead])
 	if err != nil {
 		return 0, err
 	}
@@ -269,12 +272,11 @@ func (s *AzBlockBlob) Create(URL string) (source.ParquetFile, error) {
 
 	pf.pipeReader, pf.pipeWriter = io.Pipe()
 
-	go func(ctx context.Context, blobURL *azblob.BlockBlobClient, reader io.Reader, readerPipeSource *io.PipeWriter, done chan error) {
+	go func(ctx context.Context, blobURL *blockblob.Client, reader io.Reader, readerPipeSource *io.PipeWriter, done chan error) {
 		defer close(done)
 
 		// upload data and signal done when complete
-		_, err := blobURL.UploadStream(ctx, reader, azblob.UploadStreamOptions{})
-
+		_, err := blobURL.UploadStream(ctx, reader, &blockblob.UploadStreamOptions{})
 		done <- err
 	}(pf.ctx, pf.blockBlobClient, pf.pipeReader, pf.pipeWriter, pf.writeDone)
 
